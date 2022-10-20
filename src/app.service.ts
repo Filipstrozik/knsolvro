@@ -6,3 +6,4 @@ export class AppService {
     return 'Elo mordo';
   }
 }
+//{name: string} object type
