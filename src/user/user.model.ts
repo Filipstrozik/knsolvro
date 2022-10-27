@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Cart } from 'src/cart/cart.model';
+import { Entity, Column, PrimaryGeneratedColumn, OneToOne, JoinColumn } from 'typeorm';
 
 @Entity()
 export class User {
@@ -13,4 +14,8 @@ export class User {
 
     @Column({default: true})
     isActive: boolean;
+
+    @OneToOne(() => Cart)
+    @JoinColumn()
+    cart: Cart;
 }

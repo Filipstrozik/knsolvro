@@ -7,6 +7,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { User } from './user/user.model';
 import { AuthModule } from './auth/auth.module';
+import { Product } from './products/product.model';
+import { CartModule } from './cart/cart.module';
+import { Cart } from './cart/cart.model';
+import { Item } from './item/item.model';
 
 @Module({
   imports: [ProductModule, UserModule,
@@ -17,11 +21,12 @@ import { AuthModule } from './auth/auth.module';
       username: 'sql11529680',
       password: 'RRUsaQ4qFS',
       database: 'sql11529680',
-      entities: [User],
+      entities: [User, Product, Cart, Item],
       synchronize: true,
       dropSchema: true
     }),
-    AuthModule
+    AuthModule,
+    CartModule
   ],
   controllers: [AppController],
   providers: [AppService],

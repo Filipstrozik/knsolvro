@@ -11,8 +11,7 @@ export class ProductsController{
     addProduct(
         @Body() createProductDto: CreateProductDto
     ) {
-        const generatedId = this.productService.createProduct(createProductDto);
-        return {id: generatedId};
+        return this.productService.createProduct(createProductDto);
     }
 
     @Get()
