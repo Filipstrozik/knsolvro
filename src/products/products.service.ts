@@ -1,7 +1,7 @@
 import { Injectable , NotFoundException} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CreateProductParams, UpdateProductParams } from 'src/utils/types';
 import { Repository } from 'typeorm';
-
 import { Product } from './product.model';
 
 
@@ -9,54 +9,43 @@ import { Product } from './product.model';
 export class ProductsService{
 
     constructor(
-        @InjectRepository() private productRepository: Repository<Product>,
+        @InjectRepository(Product) private productRepository: Repository<Product>,
     ) {}
 
 
-    insertProduct(title: string, desc: string, price: number) {
-        const prodId = Math.random().toString();
-        const newProduct = new Product(prodId, title, desc, price);
-        this.products.push(newProduct);
-        return prodId;
+    createProduct(productDetails: CreateProductParams) {
+        const newProduct = this.productRepository.create({...productDetails})
+        return this.productRepository.save(newProduct);
     }
 
     getProducts() {
-        return [...this.products]; //spreading operator to make a copy not a reference
+        return this.productRepository.find();
     }
 
-    getSingleProducts(prodId:string) {
-        const product = this.findProduct(prodId)[0];
-        return {...product};
+    getSingleProducts(id: number) {
+        return this.productRepository.findOne({
+            where: {
+                id: id,
+            },
+        });
     }
 
-    updateProduct(prodId:string, title: string, desc: string, price: number) {
-        const [product, index] = this.findProduct(prodId);
-        const updatedProduct = {...product};
-        if (title) {
-            updatedProduct.title = title;
-        }
-        if (desc) {
-            updatedProduct.desc = desc;
-        }
-        if (price) {
-            updatedProduct.price = price;
-        }
-        this.products[index] = updatedProduct;
+    updateProduct(id:number, productDetails: UpdateProductParams) {
+        return this.productRepository.update({id},{ ...productDetails });
     }
 
-    deleteProduct(prodId: string) {
-        const index = this.findProduct(prodId)[1];
-        this.products.splice(index,1);
+    deleteProduct(id: number) {
+        return this.productRepository.delete({id});
     }
 
-    private findProduct(id:string): [Product, number] {
-        const productIndex = this.products.findIndex((prod) => prod.id == id);
-        const product = this.products[productIndex];
-        if (!product) {
-            throw new NotFoundException('nie znaleziono produktu');
-        }
-        return [product, productIndex];
-    }
+    // private findProduct(id:string): [Product, number] {
+    //     const productIndex = this.products.findIndex((prod) => prod.id == id);
+    //     const product = this.products[productIndex];
+    //     if (!product) {
+    //         throw new NotFoundException('nie znaleziono produktu');
+    //     }
+    //     return [product, productIndex];
+    // }
 
 
 
