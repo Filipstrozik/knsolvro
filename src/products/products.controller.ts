@@ -1,21 +1,14 @@
 import { Controller , Post , Body, Get, Param, Patch, Delete} from '@nestjs/common';
+import { CreateProductDto } from './dtos/CreateProduct.dto';
 import { ProductsService } from './products.service';
 
 @Controller('products')
 export class ProductsController{
     constructor(private productService: ProductsService) {} //dependency injection
 
-    // @Post()
-    // addProduct(@Body('title') prodTitle: string):any { getting the tile
-    //     this.productService.insertProduct();
-    // }
-
     @Post()
     addProduct(
-            //@Body() completeBody: {title:string,....}
-        @Body('title') prodTitle: string, 
-        @Body('desc') prodDesc: string, 
-        @Body('price') prodPrice: number
+        @Body() createProductDto: CreateProductDto
     ) {
         const generatedId = this.productService.insertProduct(prodTitle, prodDesc, prodPrice);
         return {id: generatedId};
