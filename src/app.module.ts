@@ -23,7 +23,7 @@ import { Item } from './item/item.model';
       database: 'sql11529680',
       entities: [User, Product, Cart, Item],
       synchronize: true,
-      dropSchema: true
+      dropSchema: false
     }),
     AuthModule,
     CartModule

@@ -15,6 +15,14 @@ export class CartService {
         return this.cartRepository.find();
     }
 
+    findCart(id: number){
+        return this.cartRepository.findOne({
+            where: {
+                id: id,
+            },
+        });
+    }
+
 
     createCart(cartDetails: CreateCartParams) {
         const newCart = this.cartRepository.create({...cartDetails});
