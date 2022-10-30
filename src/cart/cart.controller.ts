@@ -21,8 +21,8 @@ export class CartController {
 
     @Get('session')
     async getUserCart(@Session() session: Record<string, any>){
-        const searchedSession = await this.cartService.findSessionById(session.id);
-        console.log(searchedSession);
+        // const searchedSession = await this.cartService.findSessionById(session.id);
+        // console.log(searchedSession);
         const newCart = await this.cartService.createCart(session.id, {session: null, items:[]});
         return newCart;
     }

@@ -47,7 +47,6 @@ export class CartService {
                 cartDetails: CreateCartParams) {
                     
         const newSessionEntity = await this.findSessionById(sessionId);
-        console.log(newSessionEntity);
         const newCart = this.cartRepository.create({...cartDetails});
 
         // await this.sessionRepository.save(newSessionEntity);
