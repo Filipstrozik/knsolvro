@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Param, ParseIntPipe, Post, Redirect, Res, Session} from '@nestjs/common';
 import { CreateItemDto } from 'src/item/dtos/CreateItem.dto';
+import { CreateProductDto } from 'src/products/dtos/CreateProduct.dto';
 import { SessionEntity } from 'src/typeorm/Session';
 import { CartService } from './cart.service';
 import { CreateCartDto } from './dtos/CreateCart.dto';
@@ -9,9 +10,16 @@ export class CartController {
 
     constructor(private cartService: CartService) {} 
 
-    @Post()
-    createCart(@Body() createItemDto: CreateItemDto){
-        return this.cartService.addItem(createItemDto);
+    @Post(":id")
+    addItem(@Session() session: Record<string, any>,
+                @Body() createItemDto: CreateItemDto,
+                @Param('id', ParseIntPipe) prodId: number){
+        return this.cartService.addItem(session.id,createItemDto, prodId);
+    }
+
+    @Post('prod')
+    createProduct(@Body() createProductDto: CreateProductDto){
+        return this.cartService.addProduct(createProductDto);
     }
 
     @Get('/carts') 

@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Item } from 'src/item/item.model';
 import { Product } from 'src/products/product.model';
 import { SessionEntity } from 'src/typeorm/Session';
-import { CreateCartParams, CreateItemParams, UpdateCartParams } from 'src/utils/types';
+import { CreateCartParams, CreateItemParams, CreateProductParams, UpdateCartParams } from 'src/utils/types';
 import { Repository } from 'typeorm';
 import { Cart } from './cart.model';
 
@@ -22,7 +22,9 @@ export class CartService {
     ) {}
 
     findCarts() {
-        return this.cartRepository.find();
+        return this.cartRepository.find({
+            relations: ['session', 'items']
+        });
     }
 
     async findCart(session: SessionEntity){
@@ -31,16 +33,19 @@ export class CartService {
                 session: session,
             },
         });
-        console.log(foundCart);
+        // console.log(foundCart);
         return foundCart;
     }
 
     
-    async addItem(itemDetails: CreateItemParams) {
-
+    async addItem(sessionId: string, itemDetails: CreateItemParams, prodId: number) {
+        const sessionEntity = await this.findSessionById(sessionId);
+        const cart = await this.findCart(sessionEntity);
+        const prod = await this.findProductById(prodId);
         const newItem  = this.itemRepository.create({...itemDetails});
+        newItem.cart = cart;
+        newItem.product = prod
         return await this.itemRepository.save(newItem);
-
     }
     
     async createCart(sessionId: string,
@@ -72,5 +77,20 @@ export class CartService {
                 id: id,
             }
         });
+    }
+
+    //product
+
+    findProductById(id: number){
+        return this.productRepository.findOne({
+            where: {
+                id: id,
+            }
+        });
+    }
+
+    addProduct(productDetails: CreateProductParams){
+        const product = this.productRepository.create({...productDetails});
+        return this.productRepository.save(product);
     }
 }
