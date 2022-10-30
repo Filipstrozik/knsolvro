@@ -1,5 +1,7 @@
 import { Item } from "src/item/item.model"
 import { SessionEntity } from "src/typeorm/Session"
+import { Cart } from "src/cart/cart.model";
+import { Product } from "src/products/product.model";
 
 export type CreateUserParams = {
     username: string,
@@ -33,3 +35,15 @@ export type UpdateCartParams = {
     items: Item[];
 }
 
+
+export type CreateItemParams  = {
+    quantity: number;
+    cart: Cart;
+    product: Product;
+}
+
+export type UpdateItemParams  = {
+    quantity: number;
+    cart: Cart;
+    product: Product;
+}

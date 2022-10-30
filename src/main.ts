@@ -19,6 +19,7 @@ async function bootstrap() {
       },
       store: new TypeormStore().connect(sessionRepository),
     }),
+    
   );
   await app.listen(3000);
 }

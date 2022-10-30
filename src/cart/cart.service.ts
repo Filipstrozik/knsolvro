@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Item } from 'src/item/item.model';
 import { Product } from 'src/products/product.model';
 import { SessionEntity } from 'src/typeorm/Session';
-import { CreateCartParams, UpdateCartParams } from 'src/utils/types';
+import { CreateCartParams, CreateItemParams, UpdateCartParams } from 'src/utils/types';
 import { Repository } from 'typeorm';
 import { Cart } from './cart.model';
 
@@ -25,21 +25,31 @@ export class CartService {
         return this.cartRepository.find();
     }
 
-    findCart(session: SessionEntity){
-        return this.cartRepository.findOne({
+    async findCart(session: SessionEntity){
+        const foundCart = await this.cartRepository.findOne({
             where: {
                 session: session,
             },
         });
+        console.log(foundCart);
+        return foundCart;
     }
 
+    
+    async addItem(itemDetails: CreateItemParams) {
 
+        const newItem  = this.itemRepository.create({...itemDetails});
+        return await this.itemRepository.save(newItem);
+
+    }
     
     async createCart(sessionId: string,
                 cartDetails: CreateCartParams) {
-        var newCart = this.cartRepository.create({...cartDetails});
+                    
+        const newSessionEntity = await this.findSessionById(sessionId);
+        console.log(newSessionEntity);
+        const newCart = this.cartRepository.create({...cartDetails});
 
-        var newSessionEntity = await this.findSessionById(sessionId);
         // await this.sessionRepository.save(newSessionEntity);
         newCart.session = newSessionEntity;
         return this.cartRepository.save(newCart);
@@ -57,12 +67,11 @@ export class CartService {
         return this.sessionRepository.find();
     }
 
-    async findSessionById(id: string){
-        return await this.sessionRepository.findOne({
+    findSessionById(id: string){
+        return this.sessionRepository.findOne({
             where: {
                 id: id,
             }
         });
-
     }
 }
