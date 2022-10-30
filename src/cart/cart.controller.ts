@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Session} from '@nestjs/common';
 import { CartService } from './cart.service';
 import { CreateCartDto } from './dtos/CreateCart.dto';
 
@@ -8,7 +8,10 @@ export class CartController {
     constructor(private cartService: CartService) {} 
 
     @Post()
-    createCart(@Body() createCartDto: CreateCartDto){
+    createCart(@Body() createCartDto: CreateCartDto,
+                @Session() session: Record<string, any>){
+        console.log('new session id: ');
+        console.log(session.id);
         return this.cartService.createCart({items:[]});
     }
      
