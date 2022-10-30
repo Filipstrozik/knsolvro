@@ -11,9 +11,9 @@ async function bootstrap() {
   const sessionRepository = app.get(DataSource).getRepository(SessionEntity);
   app.use(
     session({
-      secret: 'AAJSDLAJSDLKSJDLAKSJLFKJSFLKJSALFKJ',
+      secret: 'knsolvro',
       resave: false,
-      saveUninitialized: true,
+      saveUninitialized: false,
       cookie : {
         maxAge: 60000,
       },
