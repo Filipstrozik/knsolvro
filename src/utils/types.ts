@@ -47,3 +47,9 @@ export type UpdateItemParams  = {
     cart: Cart;
     product: Product;
 }
+
+
+export type CreateDeliveryParams = {
+    type: string;
+    price: number;
+}

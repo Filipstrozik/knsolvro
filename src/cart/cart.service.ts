@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Delivery } from 'src/delivery/delivery.model';
 import { Item } from 'src/item/item.model';
 import { Product } from 'src/products/product.model';
 import { SessionEntity } from 'src/typeorm/Session';
-import { CreateCartParams, CreateItemParams, CreateProductParams, UpdateCartParams } from 'src/utils/types';
+import { CreateCartParams, CreateItemParams, CreateProductParams, UpdateCartParams, UpdateItemParams, UpdateProductParams , CreateDeliveryParams} from 'src/utils/types';
 import { Repository } from 'typeorm';
 import { Cart } from './cart.model';
 
@@ -17,7 +18,9 @@ export class CartService {
         @InjectRepository(Product)
         private productRepository: Repository<Product>,
         @InjectRepository(Item)
-        private itemRepository: Repository<Item>
+        private itemRepository: Repository<Item>,
+        @InjectRepository(Delivery)
+        private deliveryRepository: Repository<Delivery>,
 
     ) {}
 
@@ -32,11 +35,12 @@ export class CartService {
             where: {
                 session: session,
             },
+            relations: ['session', 'items'],
         });
         // console.log(foundCart);
         return foundCart;
     }
-
+    //items
     
     async addItem(sessionId: string, itemDetails: CreateItemParams, prodId: number) {
         const sessionEntity = await this.findSessionById(sessionId);
@@ -47,6 +51,27 @@ export class CartService {
         newItem.product = prod
         return await this.itemRepository.save(newItem);
     }
+
+    async changeItemQuantity(id:number, updatedItemDetails: UpdateItemParams) {
+        return this.itemRepository.update({id},{ ...updatedItemDetails });
+    }
+
+    deleteCartItem(id: number){
+        return this.itemRepository.delete({id});
+    }
+
+
+    async getCartItems(sessionId: string){
+        const sessionEntity = await this.findSessionById(sessionId);
+        const cart = await this.findCart(sessionEntity);
+        return await this.itemRepository.find({
+            where: {
+                cart: cart,
+            }
+        })
+    }
+
+    //cart
     
     async createCart(sessionId: string,
                 cartDetails: CreateCartParams) {
@@ -67,6 +92,8 @@ export class CartService {
         return this.cartRepository.delete({id});
     }
 
+    //sessions
+
     findSessions(){
         return this.sessionRepository.find();
     }
@@ -82,15 +109,29 @@ export class CartService {
     //product
 
     findProductById(id: number){
-        return this.productRepository.findOne({
-            where: {
-                id: id,
-            }
-        });
+        return this.productRepository.findOneBy({id});
     }
 
     addProduct(productDetails: CreateProductParams){
         const product = this.productRepository.create({...productDetails});
         return this.productRepository.save(product);
     }
+
+    deleteProduct(id: number) {
+        return this.productRepository.delete({id});
+    }
+
+    updateProduct(id:number, productDetails: UpdateProductParams) {
+        return this.productRepository.update({id},{ ...productDetails });
+    }
+    
+
+
+    //delivery
+
+    addDelivery(deliveryDetails: CreateDeliveryParams) {
+        const delivery = this.deliveryRepository.create({...deliveryDetails});
+        return this.deliveryRepository.save(delivery);
+    }
+    
 }

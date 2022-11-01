@@ -1,3 +1,4 @@
+import { Delivery } from 'src/delivery/delivery.model';
 import { Item } from 'src/item/item.model';
 import { SessionEntity } from 'src/typeorm/Session';
 import { User } from 'src/user/user.model';
@@ -15,4 +16,7 @@ export class Cart {
     @OneToMany(() => Item, (item) => item.cart)
     items: Item[];
 
+    @OneToOne(() => Delivery )
+    @JoinColumn()
+    delivery: Delivery;
 }

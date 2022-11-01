@@ -12,6 +12,7 @@ import { CartModule } from './cart/cart.module';
 import { Cart } from './cart/cart.model';
 import { Item } from './item/item.model';
 import { SessionEntity } from './typeorm/Session';
+import { Delivery } from './delivery/delivery.model';
 
 @Module({
   imports: [ProductModule, UserModule,
@@ -22,7 +23,7 @@ import { SessionEntity } from './typeorm/Session';
       username: 'sql11529680',
       password: 'RRUsaQ4qFS',
       database: 'sql11529680',
-      entities: [User, Product, Cart, Item, SessionEntity],
+      entities: [User, Product, Cart, Item, SessionEntity, Delivery],
       synchronize: true,
       dropSchema: false
     }),
