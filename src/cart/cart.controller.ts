@@ -13,12 +13,12 @@ export class CartController {
     constructor(private cartService: CartService) {} 
 
     //items
-    @Post(":id")
-    addItem(@Session() session: Record<string, any>,
-                @Body() createItemDto: CreateItemDto,
-                @Param('id', ParseIntPipe) prodId: number){
-        return this.cartService.addItem(session.id,createItemDto, prodId);
-    }
+    // @Post(":id")
+    // addItem(@Session() session: Record<string, any>,
+    //             @Body() createItemDto: CreateItemDto,
+    //             @Param('id', ParseIntPipe) prodId: number){
+    //     return this.cartService.addItem(session.id,createItemDto, prodId);
+    // }
 
     @Get('items')
     getItems(@Session() session: Record<string, any>) {
@@ -56,7 +56,7 @@ export class CartController {
     async addUserCart(@Session() session: Record<string, any>){
         // const searchedSession = await this.cartService.findSessionById(session.id);
         console.log('redirected to session...');
-        const newCart = await this.cartService.createCart(session.id, {session: null, items:[]});
+        const newCart = await this.cartService.createCart(session.id, {session: null, items:[], delivery:null});
         return newCart;
     }
     
@@ -99,11 +99,25 @@ export class CartController {
         return this.cartService.findSessions();
     }
 
-    
+
+
+    //delivery
+
+
+    @Patch('delivery/:id')
+    setCartDelivery(
+        @Session() session: Record<string, any>,
+        @Param('id', ParseIntPipe) id: number
+    ) {
+        return this.cartService.setCartDelivery(session.id, id);
+    }
+
     @Post('delivery')
     createDelivery(@Body() createDeliveryDto: CreateDeliveryDto){
         return this.cartService.addDelivery(createDeliveryDto);
     }
+
+
 
     
 }

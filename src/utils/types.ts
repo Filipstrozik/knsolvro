@@ -2,6 +2,7 @@ import { Item } from "src/item/item.model"
 import { SessionEntity } from "src/typeorm/Session"
 import { Cart } from "src/cart/cart.model";
 import { Product } from "src/products/product.model";
+import { Delivery } from "src/delivery/delivery.model";
 
 export type CreateUserParams = {
     username: string,
@@ -28,11 +29,14 @@ export type UpdateProductParams = {
 export type CreateCartParams = {
     session: SessionEntity;
     items: Item[];
+    delivery: Delivery;
+
 }
 
 export type UpdateCartParams = {
     session: SessionEntity;
     items: Item[];
+    delivery: Delivery;
 }
 
 

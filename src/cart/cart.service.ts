@@ -35,7 +35,7 @@ export class CartService {
             where: {
                 session: session,
             },
-            relations: ['session', 'items'],
+            relations: ['session', 'items', 'delivery'],
         });
         // console.log(foundCart);
         return foundCart;
@@ -132,6 +132,13 @@ export class CartService {
     addDelivery(deliveryDetails: CreateDeliveryParams) {
         const delivery = this.deliveryRepository.create({...deliveryDetails});
         return this.deliveryRepository.save(delivery);
+    }
+
+    async setCartDelivery(sessionId: string, deliveryId: number){
+        const sessionEntity = await this.findSessionById(sessionId);
+        const cart = await this.findCart(sessionEntity);
+        cart.delivery = await this.deliveryRepository.findOneBy({id:deliveryId});
+        return this.cartRepository.save(cart);
     }
     
 }
