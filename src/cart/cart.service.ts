@@ -3,8 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Delivery } from 'src/delivery/delivery.model';
 import { Item } from 'src/item/item.model';
 import { Product } from 'src/products/product.model';
+import { Promo } from 'src/promotion/promo.model';
 import { SessionEntity } from 'src/typeorm/Session';
-import { CreateCartParams, CreateItemParams, CreateProductParams, UpdateCartParams, UpdateItemParams, UpdateProductParams , CreateDeliveryParams} from 'src/utils/types';
+import { CreateCartParams, CreateItemParams, CreateProductParams, UpdateCartParams, UpdateItemParams, UpdateProductParams , CreateDeliveryParams, CreatePromoParams} from 'src/utils/types';
 import { Repository } from 'typeorm';
 import { Cart } from './cart.model';
 
@@ -22,7 +23,8 @@ export class CartService {
         private itemRepository: Repository<Item>,
         @InjectRepository(Delivery)
         private deliveryRepository: Repository<Delivery>,
-
+        @InjectRepository(Promo)
+        private promoRepository: Repository<Promo>,
     ) {}
 
     findCarts() {
@@ -36,7 +38,7 @@ export class CartService {
             where: {
                 session: session,
             },
-            relations: ['session', 'items', 'delivery'],
+            relations: ['session', 'items', 'delivery', 'promo'],
         });
         // console.log(foundCart);
         return foundCart;
@@ -48,11 +50,11 @@ export class CartService {
         const cart = await this.findCart(sessionEntity);
         const prod = await this.findProductById(prodId);
         const newItem  = this.itemRepository.create({...itemDetails});
-        newItem.cart = cart;
         newItem.product = prod;
         newItem.price = prod.price * newItem.quantity;
         cart.sumPrice += newItem.price;
-        this.cartRepository.save(cart);
+        newItem.cart = cart;
+        await this.cartRepository.save(cart); // najpierw save carta
         return await this.itemRepository.save(newItem);
     }
 
@@ -171,6 +173,33 @@ export class CartService {
     }
 
 
+    //promo
+
+    addPromo(promoDetails: CreatePromoParams) {
+        const promo = this.promoRepository.create({...promoDetails});
+        return this.promoRepository.save(promo);
+    }
+
+
+    async setCartPromo(sessionId: string, promoName: string){
+        const sessionEntity = await this.findSessionById(sessionId);
+        const cart = await this.findCart(sessionEntity);
+        //if already has then minus the sum
+        // if(cart.prom != null) {
+        //     cart.sumPrice -= cart.delivery.price;
+        // }
+        const promo = await this.promoRepository.findOneBy({name: promoName});
+        cart.promo = promo;
+        cart.sumPrice *= promo.discount;
+        return this.cartRepository.save(cart);
+    }
+
+
+
+
+
+    //share
+
     getSharedLink(sessionId: string) {
         let link = 'http://localhost:3000/cart/copy/';
         return link += sessionId;
@@ -179,55 +208,30 @@ export class CartService {
     async copyCart(session: string, cartSessionToCopy: string) {
         const sessionToCopy = await this.findSessionById(cartSessionToCopy)
         const newSessionEntity = await this.findSessionById(session);
-        
         const cartToCopy = await this.findCart(sessionToCopy);
-        console.log('cart to copY');
-        console.log(cartToCopy);
-        console.log('creating new cart');
         const newCart = this.cartRepository.create();
-        console.log('finding delivery');
-        // const delivery = await this.deliveryRepository.findOneBy({id:cartToCopy.delivery.id});
-        // if(delivery != null) {
-        //     newCart.delivery = delivery;
-        // }
 
         newCart.delivery = cartToCopy.delivery;
-        console.log('set cart, copy price');
         newCart.sumPrice = cartToCopy.sumPrice;
-        console.log('set price, copy session');
         newCart.session = newSessionEntity;
-
-        console.log('copy items...');
-        //to items chyba nie dziala
+        newCart.promo = cartToCopy.promo;
 
         const itemList: Item[] = await this.getCartItems(cartSessionToCopy);
-        console.log('seve new cart');
-        
-        console.log(newCart);
-
         await this.cartRepository.save(newCart);
-        
+
         itemList.forEach( 
              item => this.copyItem(item, newCart)
         );
         
-     
         return newCart;
-        //stworzy nowy - skopuj delivery, dla kazdego itemu stworzy nowy item do nowego koszuka
     }
 
     async copyItem(item:Item, newCart: Cart){
-        console.log('product of item:');
-        console.log(item.product);
-        console.log('creating new item');
         const newItem = this.itemRepository.create({});
         newItem.price = item.price;
         newItem.quantity = item.quantity;
         newItem.product = item.product;
-        newItem.id = item.id*2; //xddd
         newItem.cart = newCart;
-        console.log('seve new item');
-        console.log(newItem);
         await this.itemRepository.save(newItem);
     }
     

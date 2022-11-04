@@ -1,5 +1,6 @@
 import { Delivery } from 'src/delivery/delivery.model';
 import { Item } from 'src/item/item.model';
+import { Promo } from 'src/promotion/promo.model';
 import { SessionEntity } from 'src/typeorm/Session';
 import { User } from 'src/user/user.model';
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany, JoinColumn, ManyToOne } from 'typeorm';
@@ -24,4 +25,8 @@ export class Cart {
     @ManyToOne(() => Delivery, (delivery) => delivery.carts)
     @JoinColumn()
     delivery: Delivery;
+
+    @ManyToOne(() => Promo,  (promo) => promo.carts)
+    @JoinColumn()
+    promo: Promo;
 }

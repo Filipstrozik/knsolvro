@@ -4,7 +4,7 @@ import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany, ManyToOne,
 
 @Entity()
 export class Item {
-    @PrimaryGeneratedColumn()
+    @PrimaryGeneratedColumn("increment")
     id: number;
 
     @Column()

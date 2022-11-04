@@ -3,6 +3,7 @@ import { CreateDeliveryDto } from 'src/delivery/dtos/CreateDelivery.dto';
 import { CreateItemDto } from 'src/item/dtos/CreateItem.dto';
 import { UpdateItemDto } from 'src/item/dtos/UpdateItem.dto';
 import { CreateProductDto } from 'src/products/dtos/CreateProduct.dto';
+import { CreatePromoDto } from 'src/promotion/dtos/CreatePromo.dto';
 import { SessionEntity } from 'src/typeorm/Session';
 import { CartService } from './cart.service';
 import { CreateCartDto } from './dtos/CreateCart.dto';
@@ -22,7 +23,7 @@ export class CartController {
     addItem(@Session() session: Record<string, any>,
                 @Body() createItemDto: CreateItemDto,
                 @Param('id', ParseIntPipe) prodId: number){
-        return this.cartService.addItem(session.id,createItemDto, prodId);
+        return this.cartService.addItem(session.id, createItemDto, prodId);
     }
 
     @Get('items')
@@ -121,6 +122,22 @@ export class CartController {
     createDelivery(@Body() createDeliveryDto: CreateDeliveryDto){
         return this.cartService.addDelivery(createDeliveryDto);
     }
+
+
+    //promo
+    @Post('promo')
+    createPromo(@Body() createPromoDto: CreatePromoDto){
+        return this.cartService.addPromo(createPromoDto);
+    }
+
+    @Patch('promo/:name')
+    setCartPromo(
+        @Session() session: Record<string, any>,
+        @Param('name') name: string
+    ) {
+        return this.cartService.setCartPromo(session.id, name);
+    }
+
 
 
 

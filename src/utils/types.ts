@@ -59,3 +59,8 @@ export type CreateDeliveryParams = {
     type: string;
     price: number;
 }
+
+export type CreatePromoParams = {
+    name: string;
+    discount: number;
+}
