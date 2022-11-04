@@ -30,6 +30,7 @@ export type CreateCartParams = {
     session: SessionEntity;
     items: Item[];
     delivery: Delivery;
+    sumPrice: number;
 
 }
 
@@ -37,6 +38,7 @@ export type UpdateCartParams = {
     session: SessionEntity;
     items: Item[];
     delivery: Delivery;
+    sumPrice: number;
 }
 
 

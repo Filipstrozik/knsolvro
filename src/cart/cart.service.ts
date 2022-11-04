@@ -10,6 +10,7 @@ import { Cart } from './cart.model';
 
 @Injectable()
 export class CartService {
+
     constructor (
         @InjectRepository(Cart)
         private cartRepository: Repository<Cart>,
@@ -48,8 +49,15 @@ export class CartService {
         const prod = await this.findProductById(prodId);
         const newItem  = this.itemRepository.create({...itemDetails});
         newItem.cart = cart;
-        newItem.product = prod
+        newItem.product = prod;
+        newItem.price = prod.price * newItem.quantity;
+        cart.sumPrice += newItem.price;
+        this.cartRepository.save(cart);
         return await this.itemRepository.save(newItem);
+    }
+
+    async setCartToItem(id: number, updatedItemDetails: CreateItemParams) {
+        return await this.itemRepository.update({id},{ ...updatedItemDetails });
     }
 
     async changeItemQuantity(id:number, updatedItemDetails: UpdateItemParams) {
@@ -64,12 +72,24 @@ export class CartService {
     async getCartItems(sessionId: string){
         const sessionEntity = await this.findSessionById(sessionId);
         const cart = await this.findCart(sessionEntity);
-        return await this.itemRepository.find({
+        const item  = await this.itemRepository.find({
             where: {
                 cart: cart,
-            }
-        })
+            },
+            relations: ['product']
+        });
+        console.log(item);
+        return item;
     }
+//TODO
+    // async getItemProduct(itemId: number){
+    //     return await this.productRepository.findOne({
+    //         where: {
+    //             items:itemId;
+    //         },
+    //         relations: ['product']
+    //     })
+    // }
 
     //cart
     
@@ -109,8 +129,10 @@ export class CartService {
     //product
 
     findProductById(id: number){
-        return this.productRepository.findOneBy({id});
+        return this.productRepository.findOneBy({id},);
     }
+
+
 
     addProduct(productDetails: CreateProductParams){
         const product = this.productRepository.create({...productDetails});
@@ -127,6 +149,7 @@ export class CartService {
     
 
 
+
     //delivery
 
     addDelivery(deliveryDetails: CreateDeliveryParams) {
@@ -137,8 +160,75 @@ export class CartService {
     async setCartDelivery(sessionId: string, deliveryId: number){
         const sessionEntity = await this.findSessionById(sessionId);
         const cart = await this.findCart(sessionEntity);
-        cart.delivery = await this.deliveryRepository.findOneBy({id:deliveryId});
+        //if already has then minus the sum
+        if(cart.delivery != null) {
+            cart.sumPrice -= cart.delivery.price;
+        }
+        const delivery = await this.deliveryRepository.findOneBy({id:deliveryId});
+        cart.delivery = delivery;
+        cart.sumPrice += delivery.price;
         return this.cartRepository.save(cart);
+    }
+
+
+    getSharedLink(sessionId: string) {
+        let link = 'http://localhost:3000/cart/copy/';
+        return link += sessionId;
+    }
+
+    async copyCart(session: string, cartSessionToCopy: string) {
+        const sessionToCopy = await this.findSessionById(cartSessionToCopy)
+        const newSessionEntity = await this.findSessionById(session);
+        
+        const cartToCopy = await this.findCart(sessionToCopy);
+        console.log('cart to copY');
+        console.log(cartToCopy);
+        console.log('creating new cart');
+        const newCart = this.cartRepository.create();
+        console.log('finding delivery');
+        // const delivery = await this.deliveryRepository.findOneBy({id:cartToCopy.delivery.id});
+        // if(delivery != null) {
+        //     newCart.delivery = delivery;
+        // }
+
+        newCart.delivery = cartToCopy.delivery;
+        console.log('set cart, copy price');
+        newCart.sumPrice = cartToCopy.sumPrice;
+        console.log('set price, copy session');
+        newCart.session = newSessionEntity;
+
+        console.log('copy items...');
+        //to items chyba nie dziala
+
+        const itemList: Item[] = await this.getCartItems(cartSessionToCopy);
+        console.log('seve new cart');
+        
+        console.log(newCart);
+
+        await this.cartRepository.save(newCart);
+        
+        itemList.forEach( 
+             item => this.copyItem(item, newCart)
+        );
+        
+     
+        return newCart;
+        //stworzy nowy - skopuj delivery, dla kazdego itemu stworzy nowy item do nowego koszuka
+    }
+
+    async copyItem(item:Item, newCart: Cart){
+        console.log('product of item:');
+        console.log(item.product);
+        console.log('creating new item');
+        const newItem = this.itemRepository.create({});
+        newItem.price = item.price;
+        newItem.quantity = item.quantity;
+        newItem.product = item.product;
+        newItem.id = item.id*2; //xddd
+        newItem.cart = newCart;
+        console.log('seve new item');
+        console.log(newItem);
+        await this.itemRepository.save(newItem);
     }
     
 }

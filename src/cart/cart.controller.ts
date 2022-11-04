@@ -12,13 +12,18 @@ export class CartController {
 
     constructor(private cartService: CartService) {} 
 
+    @Get('share')
+    shareCart(@Session() session: Record<string, any>) {
+        return this.cartService.getSharedLink(session.id);
+    }
+
     //items
-    // @Post(":id")
-    // addItem(@Session() session: Record<string, any>,
-    //             @Body() createItemDto: CreateItemDto,
-    //             @Param('id', ParseIntPipe) prodId: number){
-    //     return this.cartService.addItem(session.id,createItemDto, prodId);
-    // }
+    @Post('items/:id')
+    addItem(@Session() session: Record<string, any>,
+                @Body() createItemDto: CreateItemDto,
+                @Param('id', ParseIntPipe) prodId: number){
+        return this.cartService.addItem(session.id,createItemDto, prodId);
+    }
 
     @Get('items')
     getItems(@Session() session: Record<string, any>) {
@@ -56,7 +61,7 @@ export class CartController {
     async addUserCart(@Session() session: Record<string, any>){
         // const searchedSession = await this.cartService.findSessionById(session.id);
         console.log('redirected to session...');
-        const newCart = await this.cartService.createCart(session.id, {session: null, items:[], delivery:null});
+        const newCart = await this.cartService.createCart(session.id, {session: null, items:[], delivery:null, sumPrice:0});
         return newCart;
     }
     
@@ -118,6 +123,41 @@ export class CartController {
     }
 
 
+
+    //sharing cart to new user
+    //generating
+
+    //copy
+
+    @Get('copy/:id')
+    async copyCart(@Session() session: Record<string, any>,
+            @Param('id') cartSessionToCopy: string,
+            @Res() res) {
+
+            const searchedSession = await this.cartService.findSessionById(session.id);
+            if(!searchedSession){
+                    console.log("NO NEW session in db");
+                    //create new cart with session id
+                    session.authenticated = true;
+
+
+                    return res.redirect('http://localhost:3000/cart/copied/' + cartSessionToCopy);
+                } else {
+                    console.log('session in db');
+
+                    return res.redirect('http://localhost:3000/cart/usercart');
+                }
+        
+    }
+
+
+    @Get('copied/:id')
+    getCopiedCart(@Session() session: Record<string, any>,
+                @Param('id') cartSessionToCopy: string ){
+        console.log('copy the cart!');
+        console.log(session.id);
+        return this.cartService.copyCart(session.id, cartSessionToCopy);
+    }
 
     
 }

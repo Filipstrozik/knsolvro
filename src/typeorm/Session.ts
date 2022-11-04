@@ -10,13 +10,12 @@ export class SessionEntity implements ISession {
     }
     
     
-    @Column('bigint')
-    public expiredAt = Date.now();
+    @Column('number')
+    public expiredAt: number = Date.now();
 
-    @Index()
-    @PrimaryColumn('varchar', { length: 255 })
+    @PrimaryColumn({ length: 255 })
     public id: string = '';
 
-    @Column('text')
-    public json = '';
+    @Column()
+    public json: string = '';
 }

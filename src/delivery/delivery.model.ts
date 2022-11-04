@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Cart } from "src/cart/cart.model";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class Delivery {
@@ -11,4 +12,7 @@ export class Delivery {
 
     @Column()
     price: number;
+
+    @OneToMany(() => Cart, (cart) => cart.delivery, {cascade: true})
+    carts: Cart[];
 }
