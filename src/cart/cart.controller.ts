@@ -155,15 +155,18 @@ export class CartController { // kn glowny controller api
     }
 
 
-    //promo
-    //dodawanie rabatu do db.
+    // promo
+    // dodawanie rabatu do db. w this.cartService.addPromo(createPromoDto) 
     @Post('promo')
     createPromo(@Body() createPromoDto: CreatePromoDto) {
         return this.cartService.addPromo(createPromoDto);
     }
 
-    //kn fun 4
-    //dodawanie rabatu do koszyka, musi ten rabat istniec w db.
+    // kn fun 4
+    // dodawanie rabatu do koszyka, musi ten rabat istniec w db.
+    // przyjalem ze jezeli rabat jest np 0.8 to bedzie to minus 20 % ,
+    // po prostu jak jest mniejszy od 1.0 to oblicza rabat procetowow,
+    // a jak rabat >= 1.0 to juz odejmuje kwote od sumy koszyka.
     @Patch('promo/:name')
     setCartPromo(
         @Session() session: Record<string, any>,
@@ -171,5 +174,6 @@ export class CartController { // kn glowny controller api
     ) {
         return this.cartService.setCartPromo(session.id, name);
     }
+    
 }
 
