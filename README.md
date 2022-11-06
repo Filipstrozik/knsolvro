@@ -86,6 +86,48 @@ Body:
 8. Remember that the cart should be placed in the context of a single user session, it cannot be global.
 RE: one cart belongs to one user's session in this api.
 
+## Additional enpoints
+1. Adding new product
+```bash
+#POST
+'/cart/prod'
+Body: 
+{
+    "title": "banan",
+    "desc": "zielony",
+    "price": 44
+}
+```
+
+2. Adding new delivery
+```bash
+#POST
+'/cart/delivery'
+Body: 
+{
+    "type": "Kurier",
+    "price": 40
+}
+```
+
+
+3. Adding new promotion(discount) (percentage and fixed amount)
+```bash
+#POST
+'/cart/promo'
+Body: 
+{
+    "name": "minusK10",
+    "discount": 10
+}
+OR
+Body: 
+{
+    "name": "minus20",
+    "discount": 0.8
+}
+```
+There will be also additional endpoints to make these entities full CRUD functionalities...
 ## Installation
 No node modules are in this repository so You have to download them.
 ```bash
