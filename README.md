@@ -1,8 +1,5 @@
-<p align="center">
-  KN Solvro backend recruitment
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+
+## KN Solvro Backend Recruitment Task
 
 ## Description
 
@@ -43,7 +40,7 @@ $ npm run test
 
 ## Stay in touch
 
-- Author - [Filip Strózik](filiparkadiuszstrozik@gmail.com)
+- Author - Filip Strózik: filiparkadiuszstrozik@gmail.com
 
 ## License
 
