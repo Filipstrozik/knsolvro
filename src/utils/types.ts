@@ -1,5 +1,5 @@
 import { Item } from "src/item/item.model"
-import { SessionEntity } from "src/typeorm/Session"
+import { SessionEntity } from "src/session/Session"
 import { Cart } from "src/cart/cart.model";
 import { Product } from "src/products/product.model";
 import { Delivery } from "src/delivery/delivery.model";

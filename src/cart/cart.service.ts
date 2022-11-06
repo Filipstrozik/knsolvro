@@ -4,15 +4,15 @@ import { Delivery } from 'src/delivery/delivery.model';
 import { Item } from 'src/item/item.model';
 import { Product } from 'src/products/product.model';
 import { Promo } from 'src/promotion/promo.model';
-import { SessionEntity } from 'src/typeorm/Session';
-import { CreateCartParams, CreateItemParams, CreateProductParams, UpdateCartParams, UpdateItemParams, UpdateProductParams , CreateDeliveryParams, CreatePromoParams} from 'src/utils/types';
+import { SessionEntity } from 'src/session/Session';
+import { CreateCartParams, CreateItemParams, CreateProductParams, UpdateCartParams, UpdateItemParams, UpdateProductParams, CreateDeliveryParams, CreatePromoParams } from 'src/utils/types';
 import { Repository } from 'typeorm';
 import { Cart } from './cart.model';
 
 @Injectable()
 export class CartService {
 
-    constructor (
+    constructor(
         @InjectRepository(Cart)
         private cartRepository: Repository<Cart>,
         @InjectRepository(SessionEntity)
@@ -25,7 +25,7 @@ export class CartService {
         private deliveryRepository: Repository<Delivery>,
         @InjectRepository(Promo)
         private promoRepository: Repository<Promo>,
-    ) {}
+    ) { }
 
     findCarts() {
         return this.cartRepository.find({
@@ -33,7 +33,7 @@ export class CartService {
         });
     }
 
-    async findCart(session: SessionEntity){
+    async findCart(session: SessionEntity) {
         const foundCart = await this.cartRepository.findOne({
             where: {
                 session: session,
@@ -44,83 +44,83 @@ export class CartService {
         return foundCart;
     }
     //items
-    
+
     async addItem(sessionId: string, itemDetails: CreateItemParams, prodId: number) {
         const sessionEntity = await this.findSessionById(sessionId);
         const cart = await this.findCart(sessionEntity);
         const prod = await this.findProductById(prodId);
-        const newItem  = this.itemRepository.create({...itemDetails});
+        const newItem = this.itemRepository.create({ ...itemDetails });
         newItem.product = prod;
         newItem.price = prod.price * newItem.quantity;
         cart.sumPrice += newItem.price;
         newItem.cart = cart;
-        await this.cartRepository.save(cart); // najpierw save carta
+        await this.cartRepository.save(cart);
         return await this.itemRepository.save(newItem);
     }
 
     async setCartToItem(id: number, updatedItemDetails: CreateItemParams) {
-        return await this.itemRepository.update({id},{ ...updatedItemDetails });
+        return await this.itemRepository.update({ id }, { ...updatedItemDetails });
     }
 
-    async changeItemQuantity(id:number, updatedItemDetails: UpdateItemParams) {
-        return this.itemRepository.update({id},{ ...updatedItemDetails });
-    }
-
-    deleteCartItem(id: number){
-        return this.itemRepository.delete({id});
-    }
-
-
-    async getCartItems(sessionId: string){
+    async changeItemQuantity(sessionId: string, id: number, updatedItemDetails: UpdateItemParams) {
         const sessionEntity = await this.findSessionById(sessionId);
         const cart = await this.findCart(sessionEntity);
-        const item  = await this.itemRepository.find({
+        const item = await this.itemRepository.findOneBy({ id });
+        const prodPrice = item.price / item.quantity
+        cart.sumPrice -= item.price;
+        cart.sumPrice += updatedItemDetails.quantity * prodPrice;//TODO nie wiem czy on to pobierze
+        await this.cartRepository.save(cart);
+        return await this.itemRepository.update({ id }, { ...updatedItemDetails, price: updatedItemDetails.quantity * prodPrice});
+    }
+
+    async deleteCartItem(sessionId: string, id: number) {
+        const sessionEntity = await this.findSessionById(sessionId);
+        const cart = await this.findCart(sessionEntity);
+        const item = await this.itemRepository.findOneBy({ id });
+        cart.sumPrice -= item.price;
+        await this.cartRepository.save(cart);
+        return this.itemRepository.delete({ id });
+    }
+
+
+    async getCartItems(sessionId: string) {
+        const sessionEntity = await this.findSessionById(sessionId);
+        const cart = await this.findCart(sessionEntity);
+        const item = await this.itemRepository.find({
             where: {
                 cart: cart,
             },
             relations: ['product']
         });
-        console.log(item);
         return item;
     }
-//TODO
-    // async getItemProduct(itemId: number){
-    //     return await this.productRepository.findOne({
-    //         where: {
-    //             items:itemId;
-    //         },
-    //         relations: ['product']
-    //     })
-    // }
 
     //cart
-    
     async createCart(sessionId: string,
-                cartDetails: CreateCartParams) {
-                    
+        cartDetails: CreateCartParams) {
+
         const newSessionEntity = await this.findSessionById(sessionId);
-        const newCart = this.cartRepository.create({...cartDetails});
+        const newCart = this.cartRepository.create({ ...cartDetails });
 
         // await this.sessionRepository.save(newSessionEntity);
         newCart.session = newSessionEntity;
         return this.cartRepository.save(newCart);
     }
 
-    updateCart(id:number, updatedCartDetails: UpdateCartParams) {
-        return this.cartRepository.update({id},{ ...updatedCartDetails });
+    updateCart(id: number, updatedCartDetails: UpdateCartParams) {
+        return this.cartRepository.update({ id }, { ...updatedCartDetails });
     }
-    
-    deleteCart(id:number){
-        return this.cartRepository.delete({id});
+
+    deleteCart(id: number) {
+        return this.cartRepository.delete({ id });
     }
 
     //sessions
-
-    findSessions(){
+    findSessions() {
         return this.sessionRepository.find();
     }
 
-    findSessionById(id: string){
+    findSessionById(id: string) {
         return this.sessionRepository.findOne({
             where: {
                 id: id,
@@ -129,44 +129,42 @@ export class CartService {
     }
 
     //product
-
-    findProductById(id: number){
-        return this.productRepository.findOneBy({id},);
+    findProductById(id: number) {
+        return this.productRepository.findOneBy({ id },);
     }
 
 
 
-    addProduct(productDetails: CreateProductParams){
-        const product = this.productRepository.create({...productDetails});
+    addProduct(productDetails: CreateProductParams) {
+        const product = this.productRepository.create({ ...productDetails });
         return this.productRepository.save(product);
     }
 
     deleteProduct(id: number) {
-        return this.productRepository.delete({id});
+        return this.productRepository.delete({ id });
     }
 
-    updateProduct(id:number, productDetails: UpdateProductParams) {
-        return this.productRepository.update({id},{ ...productDetails });
+    updateProduct(id: number, productDetails: UpdateProductParams) {
+        return this.productRepository.update({ id }, { ...productDetails });
     }
-    
+
 
 
 
     //delivery
-
     addDelivery(deliveryDetails: CreateDeliveryParams) {
-        const delivery = this.deliveryRepository.create({...deliveryDetails});
+        const delivery = this.deliveryRepository.create({ ...deliveryDetails });
         return this.deliveryRepository.save(delivery);
     }
 
-    async setCartDelivery(sessionId: string, deliveryId: number){
+    async setCartDelivery(sessionId: string, deliveryId: number) {
         const sessionEntity = await this.findSessionById(sessionId);
         const cart = await this.findCart(sessionEntity);
         //if already has then minus the sum
-        if(cart.delivery != null) {
+        if (cart.delivery != null) {
             cart.sumPrice -= cart.delivery.price;
         }
-        const delivery = await this.deliveryRepository.findOneBy({id:deliveryId});
+        const delivery = await this.deliveryRepository.findOneBy({ id: deliveryId });
         cart.delivery = delivery;
         cart.sumPrice += delivery.price;
         return this.cartRepository.save(cart);
@@ -174,33 +172,35 @@ export class CartService {
 
 
     //promo
-
     addPromo(promoDetails: CreatePromoParams) {
-        const promo = this.promoRepository.create({...promoDetails});
+        const promo = this.promoRepository.create({ ...promoDetails });
         return this.promoRepository.save(promo);
     }
 
-
-    async setCartPromo(sessionId: string, promoName: string){
+    //set promo
+    async setCartPromo(sessionId: string, promoName: string) {
         const sessionEntity = await this.findSessionById(sessionId);
         const cart = await this.findCart(sessionEntity);
-        //if already has then minus the sum
-        // if(cart.prom != null) {
-        //     cart.sumPrice -= cart.delivery.price;
-        // }
-        const promo = await this.promoRepository.findOneBy({name: promoName});
+        if (cart.promo != null) {
+            if (cart.promo.discount < 1.0) { //procentowo
+                cart.sumPrice /= cart.promo.discount;
+            } else { // kwotowo
+                cart.sumPrice += cart.promo.discount;
+            }
+        }
+        const promo = await this.promoRepository.findOneBy({ name: promoName });
         cart.promo = promo;
-        cart.sumPrice *= promo.discount;
+        if (promo.discount < 1.0) { //procentowo
+            cart.sumPrice *= promo.discount;
+        } else { // kwotowo
+            cart.sumPrice -= promo.discount;
+        }
         return this.cartRepository.save(cart);
     }
 
 
-
-
-
     //share
-
-    getSharedLink(sessionId: string) {
+    getSharedLink(sessionId: string): string {
         let link = 'http://localhost:3000/cart/copy/';
         return link += sessionId;
     }
@@ -219,14 +219,14 @@ export class CartService {
         const itemList: Item[] = await this.getCartItems(cartSessionToCopy);
         await this.cartRepository.save(newCart);
 
-        itemList.forEach( 
-             item => this.copyItem(item, newCart)
+        itemList.forEach(
+            item => this.copyItem(item, newCart)
         );
-        
+
         return newCart;
     }
 
-    async copyItem(item:Item, newCart: Cart){
+    async copyItem(item: Item, newCart: Cart) {
         const newItem = this.itemRepository.create({});
         newItem.price = item.price;
         newItem.quantity = item.quantity;
@@ -234,5 +234,5 @@ export class CartService {
         newItem.cart = newCart;
         await this.itemRepository.save(newItem);
     }
-    
+
 }

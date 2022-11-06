@@ -11,7 +11,7 @@ export class Promo {
     name: string;
 
     @Column()
-    discount: number;
+    discount: number; //kn gdy jest wiekszy lub równy 1.0 to stosowane jest odejmowanie stalej kwoty.
 
     @OneToMany(() => Cart, (cart) => cart.promo, {cascade: true})
     carts: Cart[];

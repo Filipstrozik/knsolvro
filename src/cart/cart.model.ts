@@ -1,8 +1,7 @@
 import { Delivery } from 'src/delivery/delivery.model';
 import { Item } from 'src/item/item.model';
 import { Promo } from 'src/promotion/promo.model';
-import { SessionEntity } from 'src/typeorm/Session';
-import { User } from 'src/user/user.model';
+import { SessionEntity } from 'src/session/Session';
 import { Entity, Column, PrimaryGeneratedColumn, OneToOne, OneToMany, JoinColumn, ManyToOne } from 'typeorm';
 
 @Entity()

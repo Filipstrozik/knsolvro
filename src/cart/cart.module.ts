@@ -4,7 +4,7 @@ import { Delivery } from 'src/delivery/delivery.model';
 import { Item } from 'src/item/item.model';
 import { Product } from 'src/products/product.model';
 import { Promo } from 'src/promotion/promo.model';
-import { SessionEntity } from 'src/typeorm/Session';
+import { SessionEntity } from 'src/session/Session';
 import { CartController } from './cart.controller';
 import { Cart } from './cart.model';
 import { CartService } from './cart.service';
